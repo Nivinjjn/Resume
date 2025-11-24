@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Internet Speed Checker Dashboard</title>
+
+  <!-- Chart.js for graph -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fa;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+    }
+    .page {
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 0 16px 40px;
+    }
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 10px;
+    }
+    .subtitle {
+      text-align: center;
+      color: #7f8c8d;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.9fr);
+      gap: 20px;
+    }
+    @media (max-width: 800px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      padding: 20px 18px;
+      box-sizing: border-box;
+    }
+    .card h2 {
+      margin: 0 0 16px;
+      font-size: 18px;
+      color: #34495e;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    button {
+      padding: 9px 18px;
+      font-size: 14px;
+      background: #3498db;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #217dbb;
+      color: #fff;
+    }
+    button.secondary {
+      background: #ecf0f1;
+      color: #2c3e50;
+    }
+    button.secondary:hover {
+      background: #d0d7dd;
+    }
+
+    .current-speed {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .speed-box {
+      flex: 1 1 120px;
+      min-width: 120px;
+      padding: 12px 10px;
+      border-radius: 6px;
+      background: #f5f7fa;
+      text-align: center;
+    }
+    .speed-label {
+      font-size: 13px;
+      color: #7f8c8d;
+      margin-bottom: 4px;
+    }
+    .speed-value {
+      font-size: 22px;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+    .speed-unit {
+      font-size: 12px;
+      color: #7f8c8d;
+    }
+
+    .status-text {
+      font-size: 13px;
+      color: #7f8c8d;
+      margin-top: 6px;
+    }
+
+    .error {
+      color: #e74c3c;
+      margin-top: 10px;
+      font-size: 13px;
+    }
+
+    .history-list {
+      max-height: 260px;
+      overflow-y: auto;
+      margin-top: 8px;
+      border-top: 1px solid #ecf0f1;
+    }
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 8px 0;
+      border-bottom: 1px solid #f0f2f5;
+      font-size: 13px;
+    }
+    .history-time {
+      color: #7f8c8d;
+      min-width: 110px;
+    }
+    .history-speed {
+      color: #2c3e50;
+    }
+    .history-empty {
+      padding: 8px 0;
+      font-size: 13px;
+      color: #95a5a6;
+    }
+
+    canvas {
+      max-width: 100%;
+    }
+
+    .badge-online {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      margin-left: 6px;
+      background: #e8f6ff;
+      color: #2472a4;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <h1>Internet Speed Monitor</h1>
+    <p class="subtitle">
+      Real internet speed using Flask backend (speedtest-cli).
+    </p>
+
+    <div class="layout">
+      <!-- LEFT: Controls + chart -->
+      <div class="card">
+        <h2>Speed Test
+          <span id="monitorBadge" class="badge-online" style="display:none;">Monitoring…</span>
+        </h2>
+
+        <div class="controls">
+          <button onclick="runSingleTest()">Run Test</button>
+          <button class="secondary" id="monitorBtn" onclick="toggleMonitor()">Start Monitor</button>
+          <button class="secondary" onclick="clearHistory()">Clear History</button>
+        </div>
+
+        <div class="current-speed">
+          <div class="speed-box">
+            <div class="speed-label">Download</div>
+            <div class="speed-value" id="downloadValue">--</div>
+            <div class="speed-unit">Mbps</div>
+          </div>
+          <div class="speed-box">
+            <div class="speed-label">Upload</div>
+            <div class="speed-value" id="uploadValue">--</div>
+            <div class="speed-unit">Mbps</div>
+          </div>
+        </div>
+
+        <div id="status" class="status-text">
+          Click "Run Test" to measure your internet speed.
+        </div>
+        <div id="error" class="error"></div>
+
+        <hr style="margin:18px 0 14px;border:none;border-top:1px solid #ecf0f1;">
+
+        <h2 style="font-size:16px;margin-bottom:10px;">Speed Graph</h2>
+        <div style="height:200px;">
+          <canvas id="speedChart"></canvas>
+        </div>
+      </div>
+
+      <!-- RIGHT: History -->
+      <div class="card">
+        <h2>Test History</h2>
+        <div id="historyContainer" class="history-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const MONITOR_INTERVAL_MS = 60_000; // 60 seconds
+    const HISTORY_STORAGE_KEY = 'speedHistory';
+
+    let speedHistory = [];
+    let monitorTimer = null;
+    let chart = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadHistoryFromStorage();
+      initChart();
+      renderHistory();
+    });
+
+    function loadHistoryFromStorage() {
+      try {
+        const raw = localStorage.getItem(HISTORY_STORAGE_KEY);
+        if (raw) speedHistory = JSON.parse(raw);
+      } catch (e) {
+        console.warn('Could not load history:', e);
+      }
+    }
+
+    function saveHistoryToStorage() {
+      try {
+        localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(speedHistory));
+      } catch (e) {
+        console.warn('Could not save history:', e);
+      }
+    }
+
+    function clearHistory() {
+      if (!confirm('Clear all saved speed history?')) return;
+      speedHistory = [];
+      saveHistoryToStorage();
+      renderHistory();
+      updateChart();
+      document.getElementById('downloadValue').textContent = '--';
+      document.getElementById('uploadValue').textContent = '--';
+      document.getElementById('status').textContent = 'History cleared. Run a new test to see results.';
+      document.getElementById('error').textContent = '';
+    }
+
+    function renderHistory() {
+      const container = document.getElementById('historyContainer');
+      container.innerHTML = '';
+
+      if (!speedHistory.length) {
+        const empty = document.createElement('div');
+        empty.className = 'history-empty';
+        empty.textContent = 'No tests yet. Run a speed test to see history.';
+        container.appendChild(empty);
+        return;
+      }
+
+      speedHistory.slice().reverse().forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'history-item';
+
+        const time = document.createElement('div');
+        time.className = 'history-time';
+        time.textContent = formatDateTime(item.timestamp);
+
+        const speed = document.createElement('div');
+        speed.className = 'history-speed';
+        speed.textContent = `↓ ${item.download} Mbps | ↑ ${item.upload} Mbps`;
+
+        row.appendChild(time);
+        row.appendChild(speed);
+        container.appendChild(row);
+      });
+    }
+
+    function formatDateTime(ts) {
+      const d = new Date(ts);
+      const datePart = d.toLocaleDateString(undefined, { month:'short', day:'2-digit' });
+      const timePart = d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+      return `${datePart} ${timePart}`;
+    }
+
+    function formatShortTime(ts) {
+      const d = new Date(ts);
+      return d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function initChart() {
+      const ctx = document.getElementById('speedChart').getContext('2d');
+      chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: speedHistory.map(x => formatShortTime(x.timestamp)),
+          datasets: [
+            {
+              label: 'Download (Mbps)',
+              data: speedHistory.map(x => x.download),
+              borderWidth: 2,
+              tension: 0.25
+            },
+            {
+              label: 'Upload (Mbps)',
+              data: speedHistory.map(x => x.upload),
+              borderWidth: 2,
+              borderDash: [4, 4],
+              tension: 0.25
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: { display: true, text: 'Mbps' }
+            },
+            x: {
+              title: { display: true, text: 'Time' }
+            }
+          }
+        }
+      });
+    }
+
+    function updateChart() {
+      if (!chart) return;
+      chart.data.labels = speedHistory.map(x => formatShortTime(x.timestamp));
+      chart.data.datasets[0].data = speedHistory.map(x => x.download);
+      chart.data.datasets[1].data = speedHistory.map(x => x.upload);
+      chart.update();
+    }
+
+    // ✅ SINGLE correct function used by the button
+    async function runSingleTest() {
+      const status = document.getElementById('status');
+      const error = document.getElementById('error');
+      const downloadEl = document.getElementById('downloadValue');
+      const uploadEl = document.getElementById('uploadValue');
+
+      status.textContent = 'Testing...';
+      error.textContent = '';
+
+      try {
+        const url = window.location.origin + '/speedtest';
+        console.log('Calling:', url);
+
+        const res = await fetch(url);
+
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(`Server error ${res.status}: ${text}`);
+        }
+
+        const data = await res.json();
+
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        const download = Number(data.download).toFixed(2);
+        const upload = Number(data.upload).toFixed(2);
+
+        downloadEl.textContent = download;
+        uploadEl.textContent = upload;
+        status.textContent = 'Speed test completed.';
+
+        const entry = {
+          timestamp: Date.now(),
+          download,
+          upload
+        };
+        speedHistory.push(entry);
+        saveHistoryToStorage();
+        renderHistory();
+        updateChart();
+
+      } catch (e) {
+        console.error('Speedtest failed:', e);
+        error.textContent = 'Could not check internet speed: ' + e.message;
+        status.textContent = 'Speed test failed.';
+      }
+    }
+
+    function toggleMonitor() {
+      const btn = document.getElementById('monitorBtn');
+      const badge = document.getElementById('monitorBadge');
+
+      if (monitorTimer) {
+        clearInterval(monitorTimer);
+        monitorTimer = null;
+        btn.textContent = 'Start Monitor';
+        badge.style.display = 'none';
+        document.getElementById('status').textContent = 'Monitoring stopped. You can still run manual tests.';
+        return;
+      }
+
+      runSingleTest();
+      monitorTimer = setInterval(runSingleTest, MONITOR_INTERVAL_MS);
+      btn.textContent = 'Stop Monitor';
+      badge.style.display = 'inline-block';
+      document.getElementById('status').textContent = 'Monitoring started. Tests will run automatically.';
+    }
+  </script>
+</body>
+</html>

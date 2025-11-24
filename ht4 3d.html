@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Jeya Nivin — Resume</title>
+
+  <!-- Content Security Policy (allows Google Identity) -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self' https: data:;
+                 img-src 'self' https: data:;
+                 style-src 'self' 'unsafe-inline';
+                 script-src 'self' 'nonce-r4nd0m123' https://accounts.google.com;
+                 frame-src https://accounts.google.com;
+                 connect-src 'self' https:;
+                 object-src 'none';
+                 base-uri 'self';
+                 frame-ancestors 'none';
+                 form-action 'self'">
+
+  <style>
+    :root{
+      --bg:#ffffff; --text:#0a0a0a; --muted:#6b7280; --line:#e5e7eb;
+      --brand:#111827; --accent:#2563eb; --radius:18px;
+      --bg-image: url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1920&auto=format&fit=crop");
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;background:var(--bg);color:var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
+      position:relative;
+    }
+    img{max-width:100%;display:block}
+    a{text-decoration:none;color:inherit}
+
+    /* Background image + soft overlay */
+    body::before{
+      content:""; position:fixed; inset:0; z-index:-2;
+      background-image: var(--bg-image);
+      background-size:cover; background-position:center; background-attachment:fixed;
+      filter: saturate(1.1) contrast(1.05);
+      opacity:.25;
+    }
+    body::after{
+      content:""; position:fixed; inset:0; z-index:-1;
+      background:
+        radial-gradient(60% 60% at 20% 10%, rgba(255,255,255,.35), transparent 60%),
+        linear-gradient(to bottom, rgba(255,255,255,.75), rgba(255,255,255,.65) 30%, rgba(255,255,255,.55) 60%, rgba(255,255,255,.5));
+      pointer-events:none;
+    }
+
+    .wrap{max-width:1140px;margin:0 auto;padding:0 20px}
+
+    .topbar-wrap{position:sticky;top:16px;z-index:30}
+    .topbar{
+      height:56px; display:flex; align-items:center; justify-content:space-between;
+      padding:0 12px; border:1px solid var(--line); border-radius:999px;
+      background:rgba(255,255,255,.85); backdrop-filter: blur(10px);
+      box-shadow:0 10px 30px rgba(0,0,0,.06);
+    }
+    .brand{display:flex; align-items:center; gap:10px; padding:0 10px;}
+    .badge{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;
+           border:1px solid var(--line);font-weight:700;font-size:12px}
+    .nav{display:none; gap:22px}
+    .nav a{font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:#111827}
+    @media (min-width:820px){ .nav{display:flex} }
+    .auth{display:flex; gap:10px; align-items:center;}
+    .cta{border-radius:999px; border:1px solid var(--line); padding:10px 14px; font-weight:700; background:#111827; color:#fff}
+
+    .hero{display:grid; grid-template-columns:1fr; gap:28px; align-items:center; min-height:80vh; margin:48px 0 24px}
+    @media (min-width:980px){ .hero{grid-template-columns:1.05fr 1fr} }
+    .visual{
+      aspect-ratio: 4 / 3; border-radius: var(--radius); overflow:hidden;
+      border:1px solid var(--line); position:relative; background:#fafafa;
+      box-shadow:0 20px 50px rgba(0,0,0,.06);
+    }
+    .visual img{ width:120%; height:120%; object-fit:cover; position:absolute; left:-10%; top:-10%; transition:transform .8s cubic-bezier(.2,.6,.2,1) }
+    .visual:hover img{ transform:scale(1.03) }
+    .copy .eyebrow{ color:var(--muted); letter-spacing:.28em; text-transform:uppercase; font-size:12px; margin-bottom:14px; display:inline-block }
+    .copy h1{ font-size: clamp(32px, 6vw, 64px); line-height:1.02; margin:0 0 10px; font-weight:800; letter-spacing:-.01em; color:#111827 }
+    .copy p{ color:#4b5563; margin:0 0 18px; max-width:56ch }
+    .actions{ display:flex; gap:12px; align-items:center; flex-wrap:wrap }
+    .btn{ border:1px solid var(--line); border-radius:12px; padding:12px 16px; font-weight:700 }
+    .btn.primary{ background:#111827; color:#fff }
+    .btn.ghost{ background:#fff; color:#111827 }
+
+    section{ padding:56px 0; border-top:1px solid var(--line) }
+    h2{ font-size:22px; margin:0 0 6px }
+    .muted{ color:var(--muted) }
+
+    #skills ul{ list-style:disc; padding-left:20px; color:#333; margin-top:16px; }
+    #skills li{ margin-bottom:6px; }
+
+    .grid{ display:grid; gap:16px }
+    @media (min-width:900px){ .grid.cols-2{ grid-template-columns:1fr 1fr } }
+    @media (min-width:1100px){ .grid.cols-3{ grid-template-columns:repeat(3,1fr) } }
+    .card{ border:1px solid var(--line); border-radius:16px; background:#fff; padding:16px; box-shadow:0 10px 30px rgba(0,0,0,.04); cursor:pointer; transition:transform .3s ease}
+    .card:hover{ transform:scale(1.03); }
+
+    .cert-card{ display:grid; grid-template-rows: 220px auto; border:1px solid var(--line); border-radius:16px; overflow:hidden; background:#fff; box-shadow:0 10px 30px rgba(0,0,0,.04) }
+    .thumb{ width:100%; height:220px; object-fit:cover; cursor:pointer; transition: transform .25s ease }
+    .cert-card:hover .thumb{ transform:scale(1.02) }
+    .meta{ padding:14px }
+    .title{ display:inline-block; margin:4px 0 6px; font-weight:600; color:#111827 }
+    .level{ font-size:12px; color:var(--muted) }
+
+    footer{ padding:40px 0 80px; color:#6b7280; font-size:12px }
+
+    .reveal{ opacity:0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease }
+    .reveal.show{ opacity:1; transform: translateY(0) }
+
+    .mt-12{margin-top:12px}
+  </style>
+</head>
+<body>
+  <!-- Fix for console error: element expected by a script -->
+  <div id="dust-var-locale" data-locale="en-IN" hidden></div>
+
+  <div class="wrap">
+    <!-- Top pill nav -->
+    <div class="topbar-wrap">
+      <div class="topbar">
+        <div class="brand">
+          <div class="badge">JN</div>
+          <strong>Jeya&nbsp;Nivin</strong>
+        </div>
+        <nav class="nav" aria-label="Primary">
+          <a href="#home">Home</a>
+          <a href="#skills">Skills</a>
+          <a href="#experience">Experience</a>
+          <a href="#projects">Projects</a>
+          <a href="#contact">Contact</a>
+        </nav>
+        <div class="auth">
+          <!-- LinkedIn button -->
+          <a class="btn ghost" href="https://www.linkedin.com/in/jeya-nivin-69535731b/" target="_blank" rel="noopener noreferrer">
+            LinkedIn
+          </a>
+          <a class="cta" href="assets/JeyaNivin_CV.pdf" download>Download CV</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- HERO -->
+    <main id="home" class="hero">
+      <div class="visual reveal" id="heroVisual" aria-hidden="true">
+        <img src="https://images.unsplash.com/photo-1556157382-97eda2d62296?q=80&w=1600&auto=format&fit=crop" alt="Frontend setup visual" />
+      </div>
+
+      <section class="copy reveal" aria-labelledby="intro-title">
+        <span class="eyebrow">Frontend • Minimal • Fast</span>
+        <h1 id="intro-title">Building clean, modern web UI</h1>
+        <p>
+          I’m Jeya Nivin — a frontend developer focused on HTML, CSS, and JavaScript.
+          Completed a 4-week AI & Cloud internship (IBM SkillsBuild, Edunet + AICTE)
+          and earned an Angular Web Developer certification (Infosys).
+        </p>
+        <div class="actions">
+          <a class="btn primary" href="#contact">Get in touch</a>
+          <a class="btn ghost" href="#projects">See projects</a>
+        </div>
+      </section>
+    </main>
+
+    <!-- SKILLS -->
+    <section id="skills" aria-labelledby="skills-title">
+      <h2 class="reveal" id="skills-title">Skills</h2>
+      <ul class="reveal">
+        <li>HTML5</li>
+        <li>CSS3 (Flexbox, Grid, Responsive Design)</li>
+        <li>JavaScript (ES6+)</li>
+        <li>Angular (Certified)</li>
+        <li>Git & GitHub</li>
+        <li>UI/UX Basics</li>
+      </ul>
+    </section>
+
+    <!-- EXPERIENCE -->
+    <section id="experience" aria-labelledby="exp-title">
+      <h2 class="reveal" id="exp-title">Experience & Certifications</h2>
+      <div class="grid cols-2 reveal mt-12">
+        <article class="cert-card">
+          <img class="thumb" src="Screenshot 2025-11-07 231130.png" alt="AI & Cloud Internship certificate" data-url="Screenshot 2025-11-07 231130.png" />
+          <div class="meta">
+            <div class="level">Internship • Edunet + AICTE + IBM SkillsBuild</div>
+            <a class="title" href="#" data-open="Screenshot 2025-11-07 231130.png">4-week AI & Cloud Internship</a>
+            <p class="muted">15 Jul 2025 – 7 Aug 2025</p>
+          </div>
+        </article>
+
+        <article class="cert-card">
+          <img class="thumb" src="Screenshot 2025-11-07 231356.png" alt="Infosys Angular certificate" data-url="Screenshot 2025-11-07 231356.png" />
+          <div class="meta">
+            <div class="level">Certification • Infosys</div>
+            <a class="title" href="#" data-open="Screenshot 2025-11-07 231356.png">Angular Web Developer</a>
+            <p class="muted">Professional certification</p>
+          </div>
+        </article>
+
+        <article class="cert-card">
+          <img class="thumb" src="AI Foundations Associate.png" alt="Additional certificate" data-url="AI Foundations Associate.png" />
+          <div class="meta">
+            <div class="level">Certification</div>
+            <a class="title" href="#" data-open="AI Foundations Associate.png">AI Foundations Associate</a>
+            <p class="muted">Program completion</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- PROJECTS -->
+    <section id="projects" aria-labelledby="proj-title">
+      <h2 class="reveal" id="proj-title">Projects</h2>
+      <div class="grid cols-2 reveal mt-12">
+        <!-- Clickable card opens your website safely -->
+        <article class="card" data-href="http://127.0.0.1:5000/" tabindex="0" role="link" aria-label="Open Speed Monitor">
+  <strong>Netspeed Moniter</strong>
+  <p class="muted">Responsive website built with HTML, CSS (Flexbox/Grid), and JavaScript. Sleek UI, modern animations, and clean structure.</p>
+</article>
+ 
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section id="contact" aria-labelledby="contact-title">
+      <h2 class="reveal" id="contact-title">Contact</h2>
+      <p class="muted reveal">
+        Email: nivinjjn@gmail.com • India<br/>
+        Feel free to reach out for collaborations or opportunities!
+      </p>
+      <form class="reveal" onsubmit="event.preventDefault();" style="max-width:520px;margin-top:12px">
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input required placeholder="Your email" aria-label="Your email"
+                 style="flex:1;min-width:220px;padding:12px 14px;border:1px solid var(--line);border-radius:12px" />
+          <button class="btn primary" type="submit">Send</button>
+        </div>
+      </form>
+
+      <!-- Optional: Google button container if you want a visible Sign-in button
+      <div id="gsi-btn" class="mt-12"></div> -->
+    </section>
+    <center>
+      <footer>© <span id="year"></span> Jeya Nivin</footer>
+    </center>
+  </div>
+
+  <!-- Lightbox viewer -->
+  <dialog id="viewer" style="border:0;padding:0;background:transparent;">
+    <div style="position:relative;background:#fff;border:1px solid var(--line);border-radius:16px;max-width:90vw;max-height:85vh;width:min(960px,90vw);margin:auto;box-shadow:0 10px 40px rgba(0,0,0,.12)">
+      <button id="viewerClose" class="btn" style="position:absolute; right:12px; top:12px">Close</button>
+      <div id="viewerBody" style="padding:12px"></div>
+    </div>
+  </dialog>
+
+  <!-- Google Identity Services (One Tap + FedCM) -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  <script nonce="r4nd0m123">
+    // Safe locale guard (if any script tries to read it)
+    (function(){
+      const el = document.getElementById('dust-var-locale');
+      window.__APP_LOCALE__ = (el && el.dataset && el.dataset.locale) ? el.dataset.locale : 'en-IN';
+    })();
+
+    // Year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Parallax nudge on hero image
+    (function(){
+      const heroVisual = document.getElementById('heroVisual');
+      if(!heroVisual) return;
+      const heroImg = heroVisual.querySelector('img');
+      heroVisual.addEventListener('mousemove', (e)=>{
+        const r = heroVisual.getBoundingClientRect();
+        const x = (e.clientX - r.left)/r.width - .5;
+        const y = (e.clientY - r.top)/r.height - .5;
+        heroImg.style.transform = `translateX(${x*10}px) translateY(${y*10}px) scale(1.03)`;
+      });
+      heroVisual.addEventListener('mouseleave', ()=> heroImg.style.transform = 'translateX(0) translateY(0)');
+    })();
+
+    // Reveal on scroll (IntersectionObserver)
+    (function(){
+      const io = new IntersectionObserver((entries)=>{
+        entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('show'); });
+      }, { threshold: .12 });
+      document.querySelectorAll('.reveal').forEach(el=> io.observe(el));
+    })();
+
+    // Safe external opener
+    function safeOpen(url){
+      try {
+        const w = window.open(url, '_blank', 'noopener');
+        if (w) { w.opener = null; }
+      } catch(e) { /* noop */ }
+    }
+    (function(){
+      document.querySelectorAll('[data-href]').forEach(card=>{
+        const url = card.getAttribute('data-href');
+        card.addEventListener('click', ()=> safeOpen(url));
+        card.addEventListener('keydown', (e)=>{ if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); safeOpen(url); }});
+      });
+    })();
+
+    // Lightbox viewer (images only; PDFs open in a new tab for safety)
+    (function(){
+      const viewer = document.getElementById('viewer');
+      const viewerBody = document.getElementById('viewerBody');
+      const closeBtn = document.getElementById('viewerClose');
+      if(closeBtn) closeBtn.addEventListener('click', ()=> viewer.close());
+
+      function openImage(url){
+        viewerBody.innerHTML = '';
+        const img = document.createElement('img');
+        img.alt = 'Certificate';
+        img.src = url;
+        img.style.maxWidth = '100%';
+        img.style.maxHeight = '75vh';
+        img.style.display = 'block';
+        img.style.margin = 'auto';
+        viewerBody.appendChild(img);
+        viewer.showModal();
+      }
+      function handleOpen(url){
+        if (/\.pdf($|\?)/i.test(url)) safeOpen(url);
+        else openImage(url);
+      }
+      document.querySelectorAll('.cert-card .thumb').forEach(img=>{
+        const url = img.getAttribute('data-url');
+        img.addEventListener('click', ()=> handleOpen(url));
+      });
+      document.querySelectorAll('.cert-card .title').forEach(a=>{
+        const url = a.getAttribute('data-open');
+        a.addEventListener('click', (e)=>{ e.preventDefault(); handleOpen(url); });
+      });
+    })();
+
+    // ---- Google One Tap (FedCM-ready) ----
+    // Keep prompt in default position. Do not reposition with CSS/JS.
+    window.handleCredentialResponse = function(response){
+      // TODO: POST response.credential (JWT) to your backend over HTTPS
+      // fetch('/signin/google', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ credential: response.credential }) });
+      console.log('Google credential received');
+    };
+
+    window.addEventListener('DOMContentLoaded', () => {
+      if (!window.google || !google.accounts || !google.accounts.id) return;
+      google.accounts.id.initialize({
+        client_id: "YOUR_CLIENT_ID",
+        callback: handleCredentialResponse,
+        use_fedcm_for_prompt: true   // opt-in now; will be mandatory
+      });
+      google.accounts.id.prompt(); // default position, no overrides
+      // Optional visible button:
+      // google.accounts.id.renderButton(document.getElementById("gsi-btn"), { theme: "outline", size: "large" });
+    });
+  </script>
+</body>
+</html>
